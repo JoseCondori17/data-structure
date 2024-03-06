@@ -1,6 +1,7 @@
 #ifndef DATA_STRUCTURE_DOUBLY_LINKED_LIST_H
 #define DATA_STRUCTURE_DOUBLY_LINKED_LIST_H
 #include "node.h"
+#include <cstdarg>
 
 template <typename T>
 class doubly_linked_list{
@@ -178,9 +179,20 @@ template <typename T> bool doubly_linked_list<T>::contains(T value){
 template <typename T> size_t doubly_linked_list<T>::index(T value){}
 template <typename T> void doubly_linked_list<T>::emplace_front(size_t size, ...){
     va_list args;
-    
+    va_start(args, size);
+    for (size_t i = 0; i < size; ++i){
+        push_front(va_arg(args, T));
+    }
+    va_end(args);
 }
-template <typename T> void doubly_linked_list<T>::emplace_back(size_t size, ...){}
+template <typename T> void doubly_linked_list<T>::emplace_back(size_t size, ...){
+    va_list args;
+    va_start(args, size);
+    for (size_t i = 0; i < size; ++i){
+        push_back(va_arg(args, T));
+    }
+    va_end(args);
+}
 
 template <typename T> bool doubly_linked_list<T>::empty(){
     return head == nullptr;
