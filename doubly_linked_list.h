@@ -164,7 +164,6 @@ template <typename T> void doubly_linked_list<T>::clear(){
     }
     tail = nullptr;
 }
-
 template <typename T> void doubly_linked_list<T>::reverse(){}
 template <typename T> void doubly_linked_list<T>::unique(){}
 template <typename T> bool doubly_linked_list<T>::contains(T value){
@@ -176,7 +175,17 @@ template <typename T> bool doubly_linked_list<T>::contains(T value){
     }
     return false;
 }
-template <typename T> size_t doubly_linked_list<T>::index(T value){}
+template <typename T> size_t doubly_linked_list<T>::index(T value){
+    size_t position = 0;
+    node* current = head;
+    while (current){
+        if (current->data == value)
+            return position;
+        position += 1;
+        current = current->next;
+    }
+    return -1;
+}
 template <typename T> void doubly_linked_list<T>::emplace_front(size_t size, ...){
     va_list args;
     va_start(args, size);
