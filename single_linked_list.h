@@ -4,7 +4,7 @@
 #include <cstdarg>
 
 template <typename T>
-class linked_list{
+class single_linked_list{
 public:
     typedef node::SingleNode<T> node; // verify! -- typedef node::SingleNode<T>* node;
 private:
@@ -12,14 +12,13 @@ private:
     node* tail;
     size_t _size{};
 public:
-    linked_list();
-    ~linked_list();
+    single_linked_list();
+    ~single_linked_list();
 
-    linked_list(const linked_list<T>&) = default;
-    linked_list& operator =(const linked_list<T>&)=default;
-
-    linked_list(linked_list<T>&&)=default;
-    linked_list& operator =(linked_list<T>&&)=default;
+    single_linked_list(const single_linked_list<T>&) = default;
+    single_linked_list(single_linked_list<T>&&)=default;
+    single_linked_list& operator =(const single_linked_list<T>&)=default;
+    single_linked_list& operator =(single_linked_list<T>&&)=default;
 
     T front();
     T back();
@@ -27,7 +26,7 @@ public:
     void push_back(T value);
     void pop_front();
     void pop_back();
-    void insert(T value, int position);
+    void insert(T value, unsigned position);
     void insert_sort(T value);
     void erase(int position);
     void remove(T value);
@@ -45,38 +44,38 @@ public:
     bool empty();
     size_t size();
 
-    linked_list<T> operator+(linked_list& other); // union
-    linked_list<T> operator-(linked_list& other); // difference
+    single_linked_list<T> operator+(single_linked_list& other); // union
+    single_linked_list<T> operator-(single_linked_list& other); // difference
     T& operator[](int position); // get value or change value
 
-    template <typename U> friend std::ostream& operator<<(std::ostream& out, linked_list<U>& other);
+    template <typename U> friend std::ostream& operator<<(std::ostream& out, single_linked_list<U>& other);
 };
 
 /* -------------------------------- DEVELOPMENT ------------------------------------------ */
 
-template <typename T> linked_list<T>::linked_list() {
+template <typename T> single_linked_list<T>::single_linked_list() {
     this->head = nullptr;
     this->tail = nullptr;
     this->_size = 0;
 }
-template <typename T> linked_list<T>::~linked_list() {
+template <typename T> single_linked_list<T>::~single_linked_list() {
     clear();
 }
-template <typename T> T linked_list<T>::front() {
+template <typename T> T single_linked_list<T>::front() {
     if (!empty()) {
         return head->data;
     } else {
         return T();
     }
 }
-template <typename T> T linked_list<T>::back() {
+template <typename T> T single_linked_list<T>::back() {
     if (!empty()) {
         return tail->data;
     } else {
         return T();
     }
 }
-template <typename T> void linked_list<T>::push_front(T value) {
+template <typename T> void single_linked_list<T>::push_front(T value) {
     auto* new_node = new node(value);
     if (!empty()){
         new_node->next = head;
@@ -87,7 +86,7 @@ template <typename T> void linked_list<T>::push_front(T value) {
     }
     _size += 1;
 }
-template <typename T> void linked_list<T>::push_back(T value) {
+template <typename T> void single_linked_list<T>::push_back(T value) {
     auto* new_node = new node(value);
     if (!empty()){
         tail->next = new_node;
@@ -98,7 +97,7 @@ template <typename T> void linked_list<T>::push_back(T value) {
     }
     _size += 1;
 }
-template <typename T> void linked_list<T>::pop_front() {
+template <typename T> void single_linked_list<T>::pop_front() {
     if (!empty()) {
         if (head->next != nullptr) {
             node* current = head;
@@ -114,7 +113,7 @@ template <typename T> void linked_list<T>::pop_front() {
         std::cerr << "List is empty" << std::endl;
     }
 }
-template <typename T> void linked_list<T>::pop_back() {
+template <typename T> void single_linked_list<T>::pop_back() {
     if (!empty()) {
         if (head->next != nullptr) {
             node* current = head;
@@ -134,11 +133,11 @@ template <typename T> void linked_list<T>::pop_back() {
         std::cerr << "List is empty" << std::endl;
     }
 }
-template <typename T> void linked_list<T>::insert(T value, int position) {
+template <typename T> void single_linked_list<T>::insert(T value, unsigned position) {
     if (empty()) {
-        std::cerr << "List is empty" << std::endl;
+        throw std::out_of_range("List is empty");
     } else if (position >= _size || position < 0) {
-        std::cerr << "Index out of range" << std::endl;
+        throw std::out_of_range("Index out of range");
     } else {
         if (position == 0) {
             push_front(value);
@@ -156,7 +155,8 @@ template <typename T> void linked_list<T>::insert(T value, int position) {
     }
 }
 // verify ......................................................
-template <typename T> void linked_list<T>::insert_sort(T value) {
+template <typename T> void single_linked_list<T>::insert_sort(T value) {
+    /* review */
     auto* new_node = new node(value);
     if (!empty()) {
         node* current = head;
@@ -171,7 +171,7 @@ template <typename T> void linked_list<T>::insert_sort(T value) {
     }
     _size += 1;
 }
-template <typename T> void linked_list<T>::erase(int position) {
+template <typename T> void single_linked_list<T>::erase(int position) {
     if (empty()) {
         std::cerr << "List is empty" << std::endl;
     } else if (position >= _size || position < 0) {
@@ -195,31 +195,35 @@ template <typename T> void linked_list<T>::erase(int position) {
         }
     }
 }
-template <typename T> void linked_list<T>::remove(T value) {
+template <typename T> void single_linked_list<T>::remove(T value) {
     if (!empty()) {
-        if (head->data == value){
-            pop_front();
-        } else if (tail->data == value){
-            pop_back();
-        } else {
-            node* current = head;
-            node* temp;
-            while (current->next && current->next->data != value){
-                current = current->next;
+        node* current = head;
+        node* temp = nullptr;
+        while (current->next && current->data != value){
+            temp = current;
+            current = current->next;
+        }
+        if (current->data == value){
+            if (current == head){
+                pop_front();
+            } else if (current == tail){
+                pop_back();
+            } else {
+                temp->next = current->next;
+                delete current;
+                _size -= 1;
             }
-            temp = current->next;
-            current = current->next->next;
-            delete temp;
-            _size -= 1;
+        } else {
+            throw std::invalid_argument("Value not found");
         }
     } else {
-        std::cerr << "List is empty" << std::endl;
+        throw std::out_of_range("List is empty");
     }
 }
-template <typename T> void linked_list<T>::sort() {
+template <typename T> void single_linked_list<T>::sort() {
     // bubble sort - pending
 }
-template <typename T> void linked_list<T>::clear() {
+template <typename T> void single_linked_list<T>::clear() {
     while (head != nullptr){
         node* temp = head;
         head = head->next;
@@ -228,7 +232,7 @@ template <typename T> void linked_list<T>::clear() {
     tail = nullptr;
     _size = 0;
 }
-template <typename T> void linked_list<T>::reverse() {
+template <typename T> void single_linked_list<T>::reverse() {
     // pending - feedback
     if (empty()) {
         std::cerr << "List is empty" << std::endl;
@@ -247,7 +251,7 @@ template <typename T> void linked_list<T>::reverse() {
         head = previous;
     }
 }
-template <typename T> void linked_list<T>::unique() {
+template <typename T> void single_linked_list<T>::unique() {
     if (!empty()){
         node* current = head;
         node* runner = head;
@@ -268,7 +272,7 @@ template <typename T> void linked_list<T>::unique() {
         std::cerr << "List is empty" << std::endl;
     }
 }
-template <typename T> bool linked_list<T>::contains(T value) {
+template <typename T> bool single_linked_list<T>::contains(T value) {
     node* current = head;
     while (current != nullptr){
         if (current->data == value)
@@ -277,7 +281,7 @@ template <typename T> bool linked_list<T>::contains(T value) {
     }
     return false;
 }
-template <typename T> size_t linked_list<T>::index(T value) {
+template <typename T> size_t single_linked_list<T>::index(T value) {
     size_t position = 0;
     node* current = head;
     while (current != nullptr){
@@ -288,7 +292,7 @@ template <typename T> size_t linked_list<T>::index(T value) {
     }
     return -1;
 }
-template <typename T> void linked_list<T>::emplace_front(size_t size, ...) {
+template <typename T> void single_linked_list<T>::emplace_front(size_t size, ...) {
     std::va_list args;
     va_start(args, size);
     for (size_t i = 0; i < size; ++i){
@@ -296,22 +300,22 @@ template <typename T> void linked_list<T>::emplace_front(size_t size, ...) {
     }
     va_end(args);
 }
-template <typename T> void linked_list<T>::emplace_back(size_t size, ...) {
+template <typename T> void single_linked_list<T>::emplace_back(size_t size, ...) {
     std::va_list args;
     va_start(args, size);
-    for (int i = 0; i < size; ++i){
+    for (size_t i = 0; i < size; ++i){
         push_back(va_arg(args, T));
     }
     va_end(args);
 }
-template <typename T> bool linked_list<T>::empty() {
+template <typename T> bool single_linked_list<T>::empty() {
     return head == nullptr;
 }
-template <typename T> size_t linked_list<T>::size() {
+template <typename T> size_t single_linked_list<T>::size() {
     return _size;
 }
-template <typename T> linked_list<T> linked_list<T>::operator+(linked_list<T> &other) {
-    linked_list<T> new_list;
+template <typename T> single_linked_list<T> single_linked_list<T>::operator+(single_linked_list<T> &other) {
+    single_linked_list<T> new_list;
     node* current;
 
     // first list
@@ -327,9 +331,9 @@ template <typename T> linked_list<T> linked_list<T>::operator+(linked_list<T> &o
         current = current->next;
     }
 }
-template <typename T> linked_list<T> linked_list<T>::operator-(linked_list<T> &other) {
+template <typename T> single_linked_list<T> single_linked_list<T>::operator-(single_linked_list<T> &other) {
     // if ordered complexity is O(n)
-    linked_list<T> new_list;
+    single_linked_list<T> new_list;
     node* current = head;
     while (current != nullptr){
         if (!other.contains(current->data))
@@ -337,7 +341,7 @@ template <typename T> linked_list<T> linked_list<T>::operator-(linked_list<T> &o
         current = current->next;
     }
 }
-template <typename T> T &linked_list<T>::operator[](int position) {
+template <typename T> T &single_linked_list<T>::operator[](int position) {
     if (empty()) {
         std::cerr << "List is empty" << std::endl;
     } else if (position >= _size || position < 0){
@@ -351,7 +355,7 @@ template <typename T> T &linked_list<T>::operator[](int position) {
         return current->data;
     }
 }
-template <typename T> std::ostream& operator<<(std::ostream& out, linked_list<T>& other){
+template <typename T> std::ostream& operator<<(std::ostream& out, single_linked_list<T>& other){
     node::SingleNode<T>* current = other.head;
     size_t i = 0;
 
