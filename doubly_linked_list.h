@@ -153,9 +153,34 @@ template <typename T> void doubly_linked_list<T>::insert(T value,unsigned positi
         }
     }
 }
+/*  revisar el contexto, si usa el push entonces estaria desordenado y tendria que verificar si esta ordenado para aplicar esta funcion*/
 template <typename T> void doubly_linked_list<T>::insert_sort(T value){}
 template <typename T> void doubly_linked_list<T>::erase(unsigned position){}
-template <typename T> void doubly_linked_list<T>::remove(T value){}
+template <typename T> void doubly_linked_list<T>::remove(T value){ 
+    if (!empty()){
+        node* current = head;
+        while (current->next && current->data != value){
+            current = current->next;      
+        }
+
+        if (current->data == value){
+            if (current == head){
+                pop_front()
+            } else if (current == tail) {
+                pop_back()
+            } else {
+                current->prev->next = current->next;
+                current->next->prev = current->prev;
+                delete current;
+                _size -= 1;
+            }
+        } else {
+            throw std::invalid_argument("Value not found")
+        }
+    } else {
+        throw std::out_of_range("List is empty");
+    }
+}
 template <typename T> void doubly_linked_list<T>::sort(){}
 template <typename T> void doubly_linked_list<T>::clear(){
     while (head){
